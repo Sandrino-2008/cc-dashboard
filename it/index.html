@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>IT</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<header>IT-Werkzeuge</header>
+
+<div class="container">
+
+  <!-- SYSTEM-CHECK -->
+  <h2>System-Check</h2>
+  <div class="box">
+    <button onclick="runCheck()">System prüfen</button>
+    <div id="systemOutput" style="margin-top:15px;"></div>
+  </div>
+
+  <!-- PASSWORT GENERATOR -->
+  <h2>Passwort Generator</h2>
+  <div class="box">
+    <label>Länge</label>
+    <input type="number" id="pwLength" value="16" min="6" max="64">
+    <button onclick="generatePassword()">Generieren</button>
+    <input id="pwOutput" readonly>
+  </div>
+
+  <!-- PING & TRACEROUTE -->
+  <h2>Ping / Traceroute Simulation</h2>
+  <div class="box">
+    <input id="pingTarget" placeholder="Domain / IP eingeben">
+    <button onclick="ping()">Ping</button>
+    <button onclick="trace()">Traceroute</button>
+    <pre id="pingOut" style="margin-top:10px;"></pre>
+  </div>
+
+  <!-- IT-TODO -->
+  <h2>IT To-Do / Tickets</h2>
+  <div class="box">
+    <input id="todoInput" placeholder="Ticket eingeben: z.B. 'Laptop neu aufsetzen'">
+    <button onclick="addTodo()">Hinzufügen</button>
+
+    <ul id="todoList"></ul>
+  </div>
+
+  <!-- GERÄTEVERWALTUNG -->
+  <h2>Geräteverwaltung</h2>
+  <div class="box">
+    <h3>Gerät hinzufügen</h3>
+
+    <input id="devName" placeholder="Gerätename">
+    <select id="devType">
+      <option>PC</option>
+      <option>Laptop</option>
+      <option>Server</option>
+      <option>Router</option>
+      <option>Switch</option>
+      <option>Drucker</option>
+    </select>
+    <input id="devIP" placeholder="IP-Adresse (optional)">
+    <textarea id="devNote" placeholder="Notiz (optional)"></textarea>
+
+    <button onclick="addDevice()">Speichern</button>
+
+    <h3>Geräte</h3>
+    <ul id="deviceList"></ul>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   1) SYSTEM CHECK
+   ========================================================== */
+function runCheck() {
+  const os = navigator.platform;
+  const cores = navigator.hardwareConcurrency;
+  const memory = navigator.deviceMemory || "?";
+  const online = navigator.onLine ? "Online" : "Offline";
+
+  document.getElementById("systemOutput").innerHTML = `
+    <b>Betriebssystem:</b> ${os}<br>
+    <b>CPU Kerne:</b> ${cores}<br>
+    <b>RAM:</b> ${memory} GB<br>
+    <b>Status:</b> ${online}
+  `;
+}
+
+/* ==========================================================
+   2) PASSWORD GENERATOR
+   ========================================================== */
+function generatePassword() {
+  const len = Number(document.getElementById("pwLength").value);
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!§$%&/()=?,.-_+#";
+  let pw = "";
+
+  for (let i = 0; i < len; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  document.getElementById("pwOutput").value = pw;
+}
+
+/* ==========================================================
+   3) PING / TRACEROUTE
+   ========================================================== */
+function ping() {
+  const target = pingTarget.value;
+  if (!target) return;
+
+  let output = `PING ${target}:\n`;
+  for (let i = 1; i <= 4; i++) {
+    const ms = Math.floor(Math.random() * 40) + 5;
+    output += `Antwort von ${target}: Zeit=${ms}ms\n`;
+  }
+  pingOut.textContent = output;
+}
+
+function trace() {
+  const target = pingTarget.value;
+  if (!target) return;
+
+  let output = `Traceroute zu ${target}:\n`;
+  const hops = Math.floor(Math.random() * 4) + 4;
+
+  for (let i = 1; i <= hops; i++) {
+    const ms = Math.floor(Math.random() * 80) + 15;
+    output += `${i}. 10.0.${i}.${Math.floor(Math.random()*255)}  ${ms}ms\n`;
+  }
+
+  output += `Ziel erreicht: ${target}`;
+  pingOut.textContent = output;
+}
+
+/* ==========================================================
+   4) IT TODO / TICKETS
+   ========================================================== */
+let todos = JSON.parse(localStorage.getItem("itTodos") || "[]");
+
+function addTodo() {
+  if (!todoInput.value) return;
+
+  todos.push(todoInput.value);
+  localStorage.setItem("itTodos", JSON.stringify(todos));
+  todoInput.value = "";
+  renderTodos();
+}
+
+function delTodo(i) {
+  todos.splice(i, 1);
+  localStorage.setItem("itTodos", JSON.stringify(todos));
+  renderTodos();
+}
+
+function renderTodos() {
+  todoList.innerHTML = "";
+  todos.forEach((t, i) => {
+    todoList.innerHTML += `
+      <li class="list-item">
+        ${t}
+        <button onclick="delTodo(${i})">Löschen</button>
+      </li>
+    `;
+  });
+}
+
+renderTodos();
+
+/* ==========================================================
+   5) GERÄTEVERWALTUNG
+   ========================================================== */
+let devices = JSON.parse(localStorage.getItem("itDevices") || "[]");
+
+function addDevice() {
+  const dev = {
+    name: devName.value,
+    type: devType.value,
+    ip: devIP.value,
+    note: devNote.value
+  };
+
+  if (!dev.name) return alert("Name fehlt!");
+
+  devices.push(dev);
+  localStorage.setItem("itDevices", JSON.stringify(devices));
+
+  devName.value = "";
+  devIP.value = "";
+  devNote.value = "";
+
+  renderDevices();
+}
+
+function delDev(i) {
+  devices.splice(i, 1);
+  localStorage.setItem("itDevices", JSON.stringify(devices));
+  renderDevices();
+}
+
+function renderDevices() {
+  deviceList.innerHTML = "";
+
+  devices.forEach((d, i) => {
+    deviceList.innerHTML += `
+      <li class="list-item">
+        <div>
+          <b>${d.name}</b> (${d.type})<br>
+          IP: ${d.ip || "-"}<br>
+          ${d.note}
+        </div>
+        <button onclick="delDev(${i})">Löschen</button>
+      </li>
+    `;
+  });
+}
+
+renderDevices();
+</script>
+
+</body>
+</html>

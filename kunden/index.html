@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kunden</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>Kunden Übersicht</header>
+
+<div class="container">
+
+  <ul id="kundenListe"></ul>
+
+</div>
+
+<script>
+let kunden = JSON.parse(localStorage.getItem("kunden") || "[]");
+
+function del(i){
+  kunden.splice(i,1);
+  localStorage.setItem("kunden",JSON.stringify(kunden));
+  render();
+}
+
+function render(){
+  kundenListe.innerHTML = "";
+  kunden.forEach((k,i)=>{
+    kundenListe.innerHTML += `
+      <li>
+        <b>${k.vorname} ${k.nachname}</b> – KNr: ${k.knr} – ${k.notiz}
+        <button onclick="del(${i})">Löschen</button>
+      </li>
+    `;
+  });
+}
+render();
+</script>
+
+</body>
+</html>

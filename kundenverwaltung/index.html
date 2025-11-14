@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kundenverwaltung</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>Kunden anlegen</header>
+
+<div class="container">
+
+  <h2>Neuer Kunde</h2>
+
+  <input id="vor" placeholder="Vorname">
+  <input id="nach" placeholder="Nachname">
+  <input id="knr" placeholder="Kundennummer">
+  <input id="notiz" placeholder="Notiz">
+  <button onclick="addKunde()">Hinzufügen</button>
+
+  <h2>Bestehende Kunden</h2>
+  <ul id="liste"></ul>
+
+</div>
+
+<script>
+let kunden = JSON.parse(localStorage.getItem("kunden") || "[]");
+
+function addKunde(){
+  kunden.push({
+    vorname: vor.value,
+    nachname: nach.value,
+    knr: knr.value,
+    notiz: notiz.value
+  });
+  localStorage.setItem("kunden",JSON.stringify(kunden));
+  render();
+}
+
+function del(i){
+  kunden.splice(i,1);
+  localStorage.setItem("kunden",JSON.stringify(kunden));
+  render();
+}
+
+function render(){
+  liste.innerHTML = "";
+  kunden.forEach((k,i)=>{
+    liste.innerHTML += `
+      <li>
+        ${k.vorname} ${k.nachname} – ${k.knr} – ${k.notiz}
+        <button onclick="del(${i})">Löschen</button>
+      </li>
+    `;
+  });
+}
+render();
+</script>
+
+</body>
+</html>

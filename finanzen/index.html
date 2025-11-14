@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Finanzen</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>Finanzen</header>
+
+<div class="container">
+
+  <h2>Datei hochladen</h2>
+
+  <input type="file" id="fileInput">
+  <input type="text" id="tagInput" placeholder="Tag eingeben">
+  <button onclick="uploadFile()">Hochladen</button>
+
+  <h2>Filter</h2>
+  <input type="text" id="filterTags" placeholder="Tag filter">
+  <button onclick="renderFiles()">Filtern</button>
+
+  <h2>Dateien</h2>
+  <ul id="fileList"></ul>
+
+</div>
+
+<script>
+let files = JSON.parse(localStorage.getItem("finanzenFiles") || "[]");
+
+function uploadFile() {
+  const file = document.getElementById("fileInput").files[0];
+  const tag = document.getElementById("tagInput").value;
+
+  if (!file) return alert("Keine Datei ausgewählt!");
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    files.push({
+      name: file.name,
+      data: reader.result,
+      tag: tag
+    });
+    localStorage.setItem("finanzenFiles", JSON.stringify(files));
+    renderFiles();
+  };
+  reader.readAsDataURL(file);
+}
+
+function deleteFile(index) {
+  files.splice(index, 1);
+  localStorage.setItem("finanzenFiles", JSON.stringify(files));
+  renderFiles();
+}
+
+function renderFiles() {
+  const list = document.getElementById("fileList");
+  const filter = document.getElementById("filterTags").value;
+  list.innerHTML = "";
+
+  files
+    .filter(f => f.tag.includes(filter))
+    .forEach((f, i) => {
+      list.innerHTML += `
+        <li>
+          ${f.name} — <b>${f.tag}</b>
+          <button onclick="deleteFile(${i})">Löschen</button>
+        </li>
+      `;
+    });
+}
+
+renderFiles();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Passwörter</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>Passwortmanager</header>
+
+<div class="container">
+  <h2>Neuen Eintrag</h2>
+
+  <input id="domain" placeholder="Domain">
+  <input id="user" placeholder="Benutzer / Email">
+  <input id="pw" placeholder="Passwort">
+  <button onclick="addEntry()">Speichern</button>
+
+  <h2>Einträge</h2>
+  <ul id="pwList"></ul>
+</div>
+
+<script>
+let entries = JSON.parse(localStorage.getItem("passwords") || "[]");
+
+function addEntry() {
+  entries.push({
+    domain: domain.value,
+    user: user.value,
+    pw: pw.value
+  });
+  localStorage.setItem("passwords", JSON.stringify(entries));
+  render();
+}
+
+function del(i) {
+  entries.splice(i,1);
+  localStorage.setItem("passwords", JSON.stringify(entries));
+  render();
+}
+
+function render() {
+  pwList.innerHTML = "";
+  entries.forEach((e,i)=>{
+    pwList.innerHTML += `
+      <li>
+        <b>${e.domain}</b> – ${e.user} – ${e.pw}
+        <button onclick="del(${i})">Löschen</button>
+      </li>
+    `;
+  });
+}
+render();
+</script>
+
+</body>
+</html>
